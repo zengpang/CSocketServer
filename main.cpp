@@ -19,31 +19,46 @@ int main(int, char **)
         WSACleanup();                                                         // 调用 WSACleanup 函数清理 Winsock 库。
         return 1;                                                             // 返回 1 表示程序异常退出。
     }
-    serverAddr.sin_family = AF_INET;           // 设置 serverAddr 结构体的 sin_family 成员为 AF_INET，表示使用 IPv4 地址族。
-    serverAddr.sin_addr.s_addr = INADDR_ANY;   // 设置 serverAddr 结构体的 sin_addr.s_addr 成员为 INADDR_ANY，表示监听所有可用的网络接口。
-    serverAddr.sin_port = htons(DEFAULT_PORT); // 设置 serverAddr 结构体的 sin_port 成员为 htons(DEFAULT_PORT)，htons 函数用于将主机字节序的端口号转换为网络字节序。
-    if (bind(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) //bind(listenSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr))：调用 bind 函数将 listenSocket 套接字绑定到 serverAddr 结构体指定的地址和端口。
+    serverAddr.sin_family = AF_INET;                                                            // 设置 serverAddr 结构体的 sin_family 成员为 AF_INET，表示使用 IPv4 地址族。
+    serverAddr.sin_addr.s_addr = INADDR_ANY;                                                    // 设置 serverAddr 结构体的 sin_addr.s_addr 成员为 INADDR_ANY，表示监听所有可用的网络接口。
+    serverAddr.sin_port = htons(DEFAULT_PORT);                                                  // 设置 serverAddr 结构体的 sin_port 成员为 htons(DEFAULT_PORT)，htons 函数用于将主机字节序的端口号转换为网络字节序。
+    if (bind(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) // bind(listenSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr))：调用 bind 函数将 listenSocket 套接字绑定到 serverAddr 结构体指定的地址和端口。
     {
-        std::cerr << "bind failed: " << WSAGetLastError() << std::endl;//std::cerr << "bind failed: " << WSAGetLastError() << std::endl;：输出错误信息。
-        closesocket(listenSocket);//调用 closesocket 函数关闭 listenSocket 套接字。
-        WSACleanup();//清理 Winsock 库。
+        std::cerr << "bind failed: " << WSAGetLastError() << std::endl; // std::cerr << "bind failed: " << WSAGetLastError() << std::endl;：输出错误信息。
+        closesocket(listenSocket);                                      // 调用 closesocket 函数关闭 listenSocket 套接字。
+        WSACleanup();                                                   // 清理 Winsock 库。
         return 1;
     }
-    if(listen(listenSocket,SOMAXCONN)==SOCKET_ERROR) //调用用listen函数开始监听客户端的连接请求,SOMAXCONN表示允许的最大连接请求队列长度。
+    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) // 调用用listen函数开始监听客户端的连接请求,SOMAXCONN表示允许的最大连接请求队列长度。
     {
-        std::cerr<<"listen failed:"<<WSAGetLastError()<<std::endl;//输出错误信息
-        closesocket(listenSocket);//关闭 listenSocket 套接字。
-        WSACleanup();//清理Winsock库
+        std::cerr << "listen failed:" << WSAGetLastError() << std::endl; // 输出错误信息
+        closesocket(listenSocket);                                       // 关闭 listenSocket 套接字。
+        WSACleanup();                                                    // 清理Winsock库
         return 1;
     }
-    std::cout << "Server is listening on port " << DEFAULT_PORT << std::endl; //输出提示信息，表明服务器正在监听指定端口
-    clientSocket=accept(listenSocket,(struct sockaddr*)&clientAddr,&clientAddrLen);
-    if(clientSocket==INVALID_SOCKET)
+    std::cout << "Server is listening on port " << DEFAULT_PORT << std::endl; // 输出提示信息，表明服务器正在监听指定端口
+    clientSocket = accept(listenSocket, (struct sockaddr *)&clientAddr, &clientAddrLen);
+    if (clientSocket == INVALID_SOCKET)
     {
-        std::cerr<<"accept failed "<<WSAGetLastError()<<std::endl;
+        std::cerr << "accept failed " << WSAGetLastError() << std::endl;
         closesocket(listenSocket);
         WSACleanup();
         return 1;
     }
-
+    std::cout << "Client connected: " << inet_ntoa(clientAddr.sin_addr) << ":" << ntohs(clientAddr.sin_port) << std::endl;
+    int recvSize = recv(clientSocket, recvBuffer, BUFFER_SIZE, 0);
+    if (recvSize > 0)
+    {
+        recvBuffer[recvSize] = '\0';
+        std::cout << "Received from client:" << recvBuffer << std::endl;
+        const char *sendMessage = "Message received successfully!";
+        if (send(clientSocket, sendMessage, strlen(sendMessage), 0) == SOCKET_ERROR)
+        {
+            std::cerr << "send failed: " << WSAGetLastError() << std::endl;
+        }
+    }
+    else if (recvSize == 0)
+    {
+        std::cout << "Client disconnected." << std::endl;
+    }
 }
