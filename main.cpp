@@ -1,20 +1,49 @@
-#include <winsock2.h>              //åŒ…å« Windows Sockets API çš„å¤´æ–‡ä»¶ï¼Œè¯¥å¤´æ–‡ä»¶æä¾›äº†ä½¿ç”¨ Windows å¥—æŽ¥å­—æ‰€éœ€çš„å‡½æ•°ã€æ•°æ®ç±»åž‹å’Œå¸¸é‡å®šä¹‰ã€‚
-#include <windows.h>               //åŒ…å« Windows æ“ä½œç³»ç»Ÿçš„æ ¸å¿ƒå¤´æ–‡ä»¶ï¼Œæä¾›äº†è®¸å¤š Windows ç›¸å…³çš„å‡½æ•°å’Œç±»åž‹å®šä¹‰ã€‚
-#include <iostream>                //å«æ ‡å‡†è¾“å…¥è¾“å‡ºæµçš„å¤´æ–‡ä»¶ï¼Œç”¨äºŽåœ¨æŽ§åˆ¶å°è¿›è¡Œè¾“å…¥è¾“å‡ºæ“ä½œï¼Œä¾‹å¦‚ std::cout å’Œ std::cerr
-#pragma comment(lib, "ws2_32.lib") // é¢„å¤„ç†æŒ‡ä»¤ï¼Œç”¨äºŽåœ¨ç¼–è¯‘æ—¶å°† ws2_32.lib åº“é“¾æŽ¥åˆ°ç¨‹åºä¸­ã€‚ws2_32.lib æ˜¯ Windows Sockets 2 çš„å®žçŽ°åº“ï¼ŒåŒ…å«äº†å®žçŽ°ç½‘ç»œé€šä¿¡æ‰€éœ€çš„å‡½æ•°
-#define DEFAULT_PORT 8888          // å®šä¹‰ä¸€ä¸ªå® DEFAULT_PORTï¼Œè¡¨ç¤ºæœåŠ¡å™¨ç›‘å¬çš„é»˜è®¤ç«¯å£å·ä¸º 8888
-#define BUFFER_SIZE 1024           // å®šä¹‰ä¸€ä¸ªå® BUFFER_SIZEï¼Œè¡¨ç¤ºæŽ¥æ”¶æ•°æ®ç¼“å†²åŒºçš„å¤§å°ä¸º 1024 å­—èŠ‚
+#include <winsock2.h>              //°üº¬ Windows Sockets API µÄÍ·ÎÄ¼þ£¬¸ÃÍ·ÎÄ¼þÌá¹©ÁËÊ¹ÓÃ Windows Ì×½Ó×ÖËùÐèµÄº¯Êý¡¢Êý¾ÝÀàÐÍºÍ³£Á¿¶¨Òå¡£
+#include <windows.h>               //°üº¬ Windows ²Ù×÷ÏµÍ³µÄºËÐÄÍ·ÎÄ¼þ£¬Ìá¹©ÁËÐí¶à Windows Ïà¹ØµÄº¯ÊýºÍÀàÐÍ¶¨Òå¡£
+#include <iostream>                //º¬±ê×¼ÊäÈëÊä³öÁ÷µÄÍ·ÎÄ¼þ£¬ÓÃÓÚÔÚ¿ØÖÆÌ¨½øÐÐÊäÈëÊä³ö²Ù×÷£¬ÀýÈç std::cout ºÍ std::cerr
+#pragma comment(lib, "ws2_32.lib") // Ô¤´¦ÀíÖ¸Áî£¬ÓÃÓÚÔÚ±àÒëÊ±½« ws2_32.lib ¿âÁ´½Óµ½³ÌÐòÖÐ¡£ws2_32.lib ÊÇ Windows Sockets 2 µÄÊµÏÖ¿â£¬°üº¬ÁËÊµÏÖÍøÂçÍ¨ÐÅËùÐèµÄº¯Êý
+#define DEFAULT_PORT 8888          // ¶¨ÒåÒ»¸öºê DEFAULT_PORT£¬±íÊ¾·þÎñÆ÷¼àÌýµÄÄ¬ÈÏ¶Ë¿ÚºÅÎª 8888
+#define BUFFER_SIZE 1024           // ¶¨ÒåÒ»¸öºê BUFFER_SIZE£¬±íÊ¾½ÓÊÕÊý¾Ý»º³åÇøµÄ´óÐ¡Îª 1024 ×Ö½Ú
 int main(int, char **)
 {
-    WSADATA wsaData;                        // å®šä¹‰ä¸€ä¸ª WSADATA ç±»åž‹çš„å˜é‡ wsaDataï¼Œç”¨äºŽå­˜å‚¨ Winsock åº“çš„åˆå§‹åŒ–ä¿¡æ¯ã€‚
-    SOCKET listenSocket = INVALID_SOCKET;   // å®šä¹‰ä¸€ä¸ª SOCKET ç±»åž‹çš„å˜é‡ listenSocketï¼Œç”¨äºŽç›‘å¬å®¢æˆ·ç«¯è¿žæŽ¥ï¼Œåˆå§‹åŒ–ä¸º INVALID_SOCKET è¡¨ç¤ºæ— æ•ˆçš„å¥—æŽ¥å­—
-    SOCKET clientSocket = INVALID_SOCKET;   // å®šä¹‰ä¸€ä¸ª SOCKET ç±»åž‹çš„å˜é‡ clientSocketï¼Œç”¨äºŽä¸Žå®¢æˆ·ç«¯è¿›è¡Œé€šä¿¡ï¼Œåˆå§‹åŒ–ä¸º INVALID_SOCKET
-    struct sockaddr_in serverAddr;          // å®šä¹‰ä¸€ä¸ª sockaddr_in ç±»åž‹çš„ç»“æž„ä½“å˜é‡ serverAddrï¼Œç”¨äºŽå­˜å‚¨æœåŠ¡å™¨çš„åœ°å€ä¿¡æ¯ã€‚
-    struct sockaddr_in clientAddr;          // å®šä¹‰ä¸€ä¸ª sockaddr_in ç±»åž‹çš„ç»“æž„ä½“å˜é‡ clientAddrï¼Œç”¨äºŽå­˜å‚¨å®¢æˆ·ç«¯çš„åœ°å€ä¿¡æ¯ã€‚
-    int clientAddrLen = sizeof(clientAddr); // å®šä¹‰ä¸€ä¸ªæ•´åž‹å˜é‡ clientAddrLenï¼Œç”¨äºŽå­˜å‚¨å®¢æˆ·ç«¯åœ°å€ç»“æž„ä½“çš„é•¿åº¦ã€‚
-    char recvBuffer[BUFFER_SIZE];           // å®šä¹‰ä¸€ä¸ªå­—ç¬¦æ•°ç»„ recvBufferï¼Œç”¨äºŽå­˜å‚¨ä»Žå®¢æˆ·ç«¯æŽ¥æ”¶çš„æ•°æ®ï¼Œæ•°ç»„å¤§å°ä¸º BUFFER_SIZEã€‚
-    if(WSAStartup(MAKEWORD(2,2),&wsaData)!=0) //è°ƒç”¨ WSAStartup å‡½æ•°åˆå§‹åŒ– Winsock åº“ï¼ŒMAKEWORD(2, 2) è¡¨ç¤ºä½¿ç”¨ 2.2 ç‰ˆæœ¬çš„ Winsockï¼Œ&wsaData æ˜¯å­˜å‚¨åˆå§‹åŒ–ä¿¡æ¯çš„ç»“æž„ä½“æŒ‡é’ˆã€‚
+    WSADATA wsaData;                               // ¶¨ÒåÒ»¸ö WSADATA ÀàÐÍµÄ±äÁ¿ wsaData£¬ÓÃÓÚ´æ´¢ Winsock ¿âµÄ³õÊ¼»¯ÐÅÏ¢¡£
+    SOCKET listenSocket = INVALID_SOCKET;          // ¶¨ÒåÒ»¸ö SOCKET ÀàÐÍµÄ±äÁ¿ listenSocket£¬ÓÃÓÚ¼àÌý¿Í»§¶ËÁ¬½Ó£¬³õÊ¼»¯Îª INVALID_SOCKET ±íÊ¾ÎÞÐ§µÄÌ×½Ó×Ö
+    SOCKET clientSocket = INVALID_SOCKET;          // ¶¨ÒåÒ»¸ö SOCKET ÀàÐÍµÄ±äÁ¿ clientSocket£¬ÓÃÓÚÓë¿Í»§¶Ë½øÐÐÍ¨ÐÅ£¬³õÊ¼»¯Îª INVALID_SOCKET
+    struct sockaddr_in serverAddr;                 // ¶¨ÒåÒ»¸ö sockaddr_in ÀàÐÍµÄ½á¹¹Ìå±äÁ¿ serverAddr£¬ÓÃÓÚ´æ´¢·þÎñÆ÷µÄµØÖ·ÐÅÏ¢¡£
+    struct sockaddr_in clientAddr;                 // ¶¨ÒåÒ»¸ö sockaddr_in ÀàÐÍµÄ½á¹¹Ìå±äÁ¿ clientAddr£¬ÓÃÓÚ´æ´¢¿Í»§¶ËµÄµØÖ·ÐÅÏ¢¡£
+    int clientAddrLen = sizeof(clientAddr);        // ¶¨ÒåÒ»¸öÕûÐÍ±äÁ¿ clientAddrLen£¬ÓÃÓÚ´æ´¢¿Í»§¶ËµØÖ·½á¹¹ÌåµÄ³¤¶È¡£
+    char recvBuffer[BUFFER_SIZE];                  // ¶¨ÒåÒ»¸ö×Ö·ûÊý×é recvBuffer£¬ÓÃÓÚ´æ´¢´Ó¿Í»§¶Ë½ÓÊÕµÄÊý¾Ý£¬Êý×é´óÐ¡Îª BUFFER_SIZE¡£
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) // µ÷ÓÃ WSAStartup º¯Êý³õÊ¼»¯ Winsock ¿â£¬MAKEWORD(2, 2) ±íÊ¾Ê¹ÓÃ 2.2 °æ±¾µÄ Winsock£¬&wsaData ÊÇ´æ´¢³õÊ¼»¯ÐÅÏ¢µÄ½á¹¹ÌåÖ¸Õë¡£
     {
-       
+        std::cerr << "WSAStartup failed: " << WSAGetLastError() << std::endl; // Ê¹ÓÃ std::cerr Êä³ö´íÎóÐÅÏ¢£¬WSAGetLastError() º¯ÊýÓÃÓÚ»ñÈ¡×îºóÒ»´Î·¢ÉúµÄ Winsock ´íÎó´úÂë¡£
+        WSACleanup();                                                         // µ÷ÓÃ WSACleanup º¯ÊýÇåÀí Winsock ¿â¡£
+        return 1;                                                             // ·µ»Ø 1 ±íÊ¾³ÌÐòÒì³£ÍË³ö¡£
     }
+    serverAddr.sin_family = AF_INET;           // ÉèÖÃ serverAddr ½á¹¹ÌåµÄ sin_family ³ÉÔ±Îª AF_INET£¬±íÊ¾Ê¹ÓÃ IPv4 µØÖ·×å¡£
+    serverAddr.sin_addr.s_addr = INADDR_ANY;   // ÉèÖÃ serverAddr ½á¹¹ÌåµÄ sin_addr.s_addr ³ÉÔ±Îª INADDR_ANY£¬±íÊ¾¼àÌýËùÓÐ¿ÉÓÃµÄÍøÂç½Ó¿Ú¡£
+    serverAddr.sin_port = htons(DEFAULT_PORT); // ÉèÖÃ serverAddr ½á¹¹ÌåµÄ sin_port ³ÉÔ±Îª htons(DEFAULT_PORT)£¬htons º¯ÊýÓÃÓÚ½«Ö÷»ú×Ö½ÚÐòµÄ¶Ë¿ÚºÅ×ª»»ÎªÍøÂç×Ö½ÚÐò¡£
+    if (bind(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) //bind(listenSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr))£ºµ÷ÓÃ bind º¯Êý½« listenSocket Ì×½Ó×Ö°ó¶¨µ½ serverAddr ½á¹¹ÌåÖ¸¶¨µÄµØÖ·ºÍ¶Ë¿Ú¡£
+    {
+        std::cerr << "bind failed: " << WSAGetLastError() << std::endl;//std::cerr << "bind failed: " << WSAGetLastError() << std::endl;£ºÊä³ö´íÎóÐÅÏ¢¡£
+        closesocket(listenSocket);//µ÷ÓÃ closesocket º¯Êý¹Ø±Õ listenSocket Ì×½Ó×Ö¡£
+        WSACleanup();//ÇåÀí Winsock ¿â¡£
+        return 1;
+    }
+    if(listen(listenSocket,SOMAXCONN)==SOCKET_ERROR) //µ÷ÓÃÓÃlistenº¯Êý¿ªÊ¼¼àÌý¿Í»§¶ËµÄÁ¬½ÓÇëÇó,SOMAXCONN±íÊ¾ÔÊÐíµÄ×î´óÁ¬½ÓÇëÇó¶ÓÁÐ³¤¶È¡£
+    {
+        std::cerr<<"listen failed:"<<WSAGetLastError()<<std::endl;//Êä³ö´íÎóÐÅÏ¢
+        closesocket(listenSocket);//¹Ø±Õ listenSocket Ì×½Ó×Ö¡£
+        WSACleanup();//ÇåÀíWinsock¿â
+        return 1;
+    }
+    std::cout << "Server is listening on port " << DEFAULT_PORT << std::endl; //Êä³öÌáÊ¾ÐÅÏ¢£¬±íÃ÷·þÎñÆ÷ÕýÔÚ¼àÌýÖ¸¶¨¶Ë¿Ú
+    clientSocket=accept(listenSocket,(struct sockaddr*)&clientAddr,&clientAddrLen);
+    if(clientSocket==INVALID_SOCKET)
+    {
+        std::cerr<<"accept failed "<<WSAGetLastError()<<std::endl;
+        closesocket(listenSocket);
+        WSACleanup();
+        return 1;
+    }
+
 }
