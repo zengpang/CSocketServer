@@ -45,20 +45,32 @@ int main(int, char **)
         WSACleanup();
         return 1;
     }
+    /**
+     * 输出提示信息，显示客户端的IP地址和端口号，inet_ntoa 函数用于将网络字节序的IP地址转换为
+     * 点分十进制字符串，ntohs 函数用于将网络字节序的端口号转换为主机字节序
+     */
     std::cout << "Client connected: " << inet_ntoa(clientAddr.sin_addr) << ":" << ntohs(clientAddr.sin_port) << std::endl;
-    int recvSize = recv(clientSocket, recvBuffer, BUFFER_SIZE, 0);
-    if (recvSize > 0)
+    int recvSize = recv(clientSocket, recvBuffer, BUFFER_SIZE, 0); // 调用recv函数从客户端接收数据，返回实际接收的字节数存储在recvSize中
+    if (recvSize > 0)                                              // 如果 recvSize 大于 0 表示成功接收到数据
     {
-        recvBuffer[recvSize] = '\0';
-        std::cout << "Received from client:" << recvBuffer << std::endl;
-        const char *sendMessage = "Message received successfully!";
-        if (send(clientSocket, sendMessage, strlen(sendMessage), 0) == SOCKET_ERROR)
+        recvBuffer[recvSize] = '\0';                                                 // 在接收到的数据末尾添加字符串结束符 '\0'
+        std::cout << "Received from client:" << recvBuffer << std::endl;             // 输出接收到的客户端数据
+        const char *sendMessage = "Message received successfully!";                  // 定义一个常量字符串sendMessage，作为响应消息。
+        if (send(clientSocket, sendMessage, strlen(sendMessage), 0) == SOCKET_ERROR) // 调用Send函数将响应消息发送给客户端，检查返回值，如果返回SOCKET_ERROR表示发送失败
         {
-            std::cerr << "send failed: " << WSAGetLastError() << std::endl;
+            std::cerr << "send failed: " << WSAGetLastError() << std::endl; // 输出发送失败的错误信息
         }
     }
-    else if (recvSize == 0)
+    else if (recvSize == 0) // 如果 recvise等于0表示客户端正常断开连接
     {
-        std::cout << "Client disconnected." << std::endl;
+        std::cout << "Client disconnected." << std::endl; // 输出客户端断开连接的提示信息
     }
+    else
+    {
+        std::cout << "recv failed:" << WSAGetLastError() << std::endl; // 输出接收数据失败的错误信息
+    }
+    closesocket(clientSocket); // 关闭与客户端通信的套接字
+    closesocket(listenSocket); // 关闭监听套接字
+    WSACleanup();              // 调用 WSACleanup 函数清理 Winsock 库
+    return 0;
 }
