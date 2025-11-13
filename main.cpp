@@ -19,6 +19,13 @@ int main(int, char **)
         WSACleanup();                                                         // 调用 WSACleanup 函数清理 Winsock 库。
         return 1;                                                             // 返回 1 表示程序异常退出。
     }
+    listenSocket = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
+    if(listenSocket == INVALID_SOCKET)
+    {
+        std::cerr<<"socket failed: "<<WSAGetLastError()<<std::endl;
+        WSACleanup();
+        return 1;
+    }
     serverAddr.sin_family = AF_INET;                                                            // 设置 serverAddr 结构体的 sin_family 成员为 AF_INET，表示使用 IPv4 地址族。
     serverAddr.sin_addr.s_addr = INADDR_ANY;                                                    // 设置 serverAddr 结构体的 sin_addr.s_addr 成员为 INADDR_ANY，表示监听所有可用的网络接口。
     serverAddr.sin_port = htons(DEFAULT_PORT);                                                  // 设置 serverAddr 结构体的 sin_port 成员为 htons(DEFAULT_PORT)，htons 函数用于将主机字节序的端口号转换为网络字节序。
