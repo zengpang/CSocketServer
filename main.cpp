@@ -4,6 +4,15 @@
 #pragma comment(lib, "ws2_32.lib") // 预处理指令，用于在编译时将 ws2_32.lib 库链接到程序中。ws2_32.lib 是 Windows Sockets 2 的实现库，包含了实现网络通信所需的函数
 #define DEFAULT_PORT 8888          // 定义一个宏 DEFAULT_PORT，表示服务器监听的默认端口号为 8888
 #define BUFFER_SIZE 1024           // 定义一个宏 BUFFER_SIZE，表示接收数据缓冲区的大小为 1024 字节
+/**
+ * socket 发送消息
+ */
+void socketSendMsg(SOCKET clientSocket,const char *sendMessage){
+    if(send(clientSocket,sendMessage,strlen(sendMessage),0))
+    {
+        std::cerr << "send failed: " << WSAGetLastError() << std::endl; // 输出发送失败的错误信息
+    }
+}
 int main(int, char **)
 {
     WSADATA wsaData;                               // 定义一个 WSADATA 类型的变量 wsaData，用于存储 Winsock 库的初始化信息。
@@ -57,16 +66,19 @@ int main(int, char **)
      * 点分十进制字符串，ntohs 函数用于将网络字节序的端口号转换为主机字节序
      */
     std::cout << "Client connected: " << inet_ntoa(clientAddr.sin_addr) << ":" << ntohs(clientAddr.sin_port) << std::endl;
+    
+    /**
+     * 连接之后发送消息
+     */
+    const char *connectMsg="服务端发送的连接测试消息";
+    socketSendMsg(clientSocket,connectMsg);
     int recvSize = recv(clientSocket, recvBuffer, BUFFER_SIZE, 0); // 调用recv函数从客户端接收数据，返回实际接收的字节数存储在recvSize中
     if (recvSize > 0)                                              // 如果 recvSize 大于 0 表示成功接收到数据
     {
         recvBuffer[recvSize] = '\0';                                                 // 在接收到的数据末尾添加字符串结束符 '\0'
         std::cout << "Received from client:" << recvBuffer << std::endl;             // 输出接收到的客户端数据
         const char *sendMessage = "Message received successfully!";                  // 定义一个常量字符串sendMessage，作为响应消息。
-        if (send(clientSocket, sendMessage, strlen(sendMessage), 0) == SOCKET_ERROR) // 调用Send函数将响应消息发送给客户端，检查返回值，如果返回SOCKET_ERROR表示发送失败
-        {
-            std::cerr << "send failed: " << WSAGetLastError() << std::endl; // 输出发送失败的错误信息
-        }
+        socketSendMsg(clientSocket,sendMessage);
     }
     else if (recvSize == 0) // 如果 recvise等于0表示客户端正常断开连接
     {
